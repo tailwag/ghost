@@ -1,0 +1,53 @@
+#!/usr/bin/python
+
+# gHost - Devin Shoemaker 2019-02-28
+# retrieves vhost for a specific site on cPanel servers 
+# usage:
+#       $ ghost example.com
+
+import sys 
+import subprocess
+import re
+
+
+domain = sys.argv[1]
+
+# retrieve whole httpd.conf
+conf = subprocess.check_output(["sudo", "cat", "/etc/apache2/conf/httpd.conf"])
+
+# convert httpd.conf into list by line
+vhost = conf.split('\n')
+
+# define regex for searching by domanin name 
+serverna = re.compile(r'.*Server(Name|Alias).*?\s'+domain+'.*?')
+
+# return line searched for 
+found = list(filter(serverna.match, vhost))[-1]
+
+# get line number of returned line
+check = [i for i, x in enumerate(vhost) if x == found][-1]
+
+vbegin=check
+vend=check
+
+# matched opening and closing vhost tag 
+vline = re.compile(r'</?VirtualHost.*?>')
+
+while vbegin <= check:
+    grep = vline.search(vhost[vbegin])
+    if grep != None:
+        break
+    vbegin -= 1
+
+while vend >= check:
+    grep = vline.search(vhost[vend])
+    if grep != None:
+        break
+    vend += 1
+
+prog=vbegin
+
+while prog <= vend:
+    print(vhost[prog])
+    prog += 1
+
