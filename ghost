@@ -6,12 +6,12 @@
 # usage:
 #       $ ghost example.com
 
+import os 
+import re
 import sys 
 import subprocess
-import re
 
-
-domain = sys.argv[1]
+search = sys.argv[1]
 
 # retrieve whole httpd.conf
 conf = subprocess.Popen(["sudo", "cat", "/etc/apache2/conf/httpd.conf"], stdout=subprocess.PIPE).communicate()[0]
@@ -20,7 +20,10 @@ conf = subprocess.Popen(["sudo", "cat", "/etc/apache2/conf/httpd.conf"], stdout=
 vhost = conf.split('\n')
 
 # define regex for searching by domanin name 
-serverna = re.compile(r'.*Server(Name|Alias).*?\s'+domain+'.*?')
+if os.path.isdir(search):
+    serverna = re.compile(r'\s{2}DocumentRoot\s'+search)
+else:
+    serverna = re.compile(r'.*Server(Name|Alias).*?\s'+search+'.*?')
 
 # return line searched for 
 found = list(filter(serverna.match, vhost))[-1]
