@@ -14,7 +14,7 @@ import re
 domain = sys.argv[1]
 
 # retrieve whole httpd.conf
-conf = subprocess.check_output(["sudo", "cat", "/etc/apache2/conf/httpd.conf"])
+conf = subprocess.Popen(["sudo", "cat", "/etc/apache2/conf/httpd.conf"], stdout=subprocess.PIPE).communicate()[0]
 
 # convert httpd.conf into list by line
 vhost = conf.split('\n')
